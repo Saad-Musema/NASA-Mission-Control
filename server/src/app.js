@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const cors = require('cors')
 const path = require('path');
 const morgan = require('morgan');
 
@@ -8,18 +9,22 @@ const launchesRouter = require('./routes/launches/launches.router.js');
 
 const app = express();
 
-var launchLogStream = fs.createWriteStream(path.join(__dirname, "..", "/data", "access.log"))
+app.use(cors({
+    origin: 'http://localhost:3000',
+}))
 
+var launchLogStream = fs.createWriteStream(path.join(__dirname, "..", "/data", "access.log"))
+ 
 app.use(morgan('combined', {stream: launchLogStream}));
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')))
+app.use(express.static(path.join(__dirname, '..' ,'public')))
 
-app.use(planetsRouter);
-app.use(launchesRouter);
+app.use('/planets', planetsRouter);
+app.use('/launches', launchesRouter);
 
-app.get('/' , (req, res) => {
-    res.sendFile(__dirname, '..', 'index.html');
+app.get('/*' , (req, res) => {
+    res.sendFile(path.join(__dirname, '..' ,'public' , 'index.html'));
 })
 
-module.exports = app;
+module.exports = app; 
